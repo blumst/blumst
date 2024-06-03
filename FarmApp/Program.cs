@@ -4,11 +4,13 @@
     {
         static void Main(string[] args)
         {
-            var farm = new Farm();
             var printer = new FarmPrinter();
             var fileManager = new FarmFileManager();
 
-            fileManager.LoadFromFile(farm);
+            var farmData = fileManager.LoadFromFile();
+
+            var farm = new Farm(farmData.FruitBoxes, farmData.VeggieBoxes);
+            
 
             Console.WriteLine("Do you want to see current storage? y/n");
 

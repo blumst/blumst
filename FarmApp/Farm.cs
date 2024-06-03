@@ -1,20 +1,14 @@
 ﻿namespace FarmApp
 {
-    public enum BoxType
-    {
-        Fruit,
-        Vegetable
-    }
-
     public class Farm
     {
-        public int FruitBoxes { get; set; }
-        public int VeggieBoxes { get; set; }
+        public int FruitBoxes { get; private set; }
+        public int VeggieBoxes { get; private set; }
 
-        public Farm()
+        public Farm(int fruitBoxes, int veggieBoxes)
         {
-            FruitBoxes = 0;
-            VeggieBoxes = 0;
+            FruitBoxes = fruitBoxes;
+            VeggieBoxes = veggieBoxes;
         }
 
         public void AddBox(BoxType boxType, int quantity)
