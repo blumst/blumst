@@ -42,28 +42,14 @@
 
         static bool ProcessCommand(string input, Farm farm, FarmPrinter printer, FarmFileManager fileManager)
         {
-
-            const string add = "add";
-            const string remove = "remove";
-
-            string[] command = input.Split(' ');
-
-            if (command.Length != 3)
-                return false;
-
-            string operation = command[0];
-
-            if (!int.TryParse(command[2], out int quantity))
-                return false;
-            
-            if (!Enum.TryParse(command[1], true, out BoxType boxType))
+            if(!ConsoleUtility.CommandParser(input, out string operation, out BoxType boxType, out int quantity))
                 return false;
 
             try
             {
-                if (operation == add)
+                if (operation == ConsoleUtility.add)
                     farm.AddBox(boxType, quantity);
-                else if (operation == remove)
+                else if (operation == ConsoleUtility.remove)
                     farm.RemoveBox(boxType, quantity);
                 else
                     return false;
