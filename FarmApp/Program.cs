@@ -42,19 +42,19 @@
 
         static bool ProcessCommand(string input, Farm farm, FarmPrinter printer, FarmFileManager fileManager)
         {
-            if(!ConsoleUtility.CommandParser(input, out string operation, out BoxType boxType, out int quantity))
+            if(!ConsoleUtility.CommandParser(input, out CommandParameters parameters))
                 return false;
 
             try
             {
-                if (operation == ConsoleUtility.add)
-                    farm.AddBox(boxType, quantity);
-                else if (operation == ConsoleUtility.remove)
-                    farm.RemoveBox(boxType, quantity);
+                if (parameters.Operation == ConsoleUtility.add)
+                    farm.AddBox(parameters.BoxType, parameters.Quantity);
+                else if (parameters.Operation == ConsoleUtility.remove)
+                    farm.RemoveBox(parameters.BoxType, parameters.Quantity);
                 else
                     return false;
 
-                printer.PrintInfo(operation, quantity, boxType, farm);
+                printer.PrintInfo(parameters.Operation, parameters.Quantity, parameters.BoxType, farm);
 
                 fileManager.SaveToFile(farm);
 

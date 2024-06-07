@@ -5,24 +5,28 @@
         public const string add = "add";
         public const string remove = "remove";
 
-        public static bool CommandParser(string input, out string operation, out BoxType boxType, out int quantity)
+        public static bool CommandParser(string input, out CommandParameters parameters)
         {
-            operation = string.Empty;
-            boxType = default;
-            quantity = 0; 
+            parameters = null!;
             
             string[] command = input.Split(' ');
 
             if (command.Length != 3)
                 return false;
 
-            operation = command[0];
 
-            if (!int.TryParse(command[2], out quantity))
+            if (!int.TryParse(command[2], out int quantity))
                 return false;
 
-            if (!Enum.TryParse(command[1], true, out boxType))
+            if (!Enum.TryParse(command[1], true, out BoxType boxType))
                 return false;
+
+            parameters = new CommandParameters()
+            {
+                Operation = command[0],
+                BoxType = boxType,
+                Quantity = quantity
+            };
 
             return true;
         }
