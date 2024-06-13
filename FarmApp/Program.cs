@@ -1,4 +1,6 @@
-﻿namespace FarmApp
+﻿using FarmApp.Utilities;
+
+namespace FarmApp
 {
     internal class Program
     {
@@ -9,32 +11,32 @@
 
             var farmData = fileManager.LoadFromFile();
 
-            var farm = new Farm(farmData.FruitBoxes, farmData.VeggieBoxes);
-            
+            var farm = new Farm(farmData.Boxes ?? new List<Box>());
+
 
             Console.WriteLine("Do you want to see current storage? y/n");
 
-            if (Console.ReadLine().ToLower() == "y")
+            if (Console.ReadLine()?.ToLower() == "y")
                 printer.PrintStorage(farm);
             
             
             Console.WriteLine("Avaliable box types: \n fruit \n vegetable \n");
-            Console.WriteLine("Enter a command (add [box type] [quantity] / remove [box type] [quantity] / exit): ");
+            Console.WriteLine("Enter a command (add [box type] [quantity] / remove [box type] [quantity] / boxadded [date] / boxcountbydate [box type] / exit): ");
 
             string input;
             
-            while ((input = Console.ReadLine().ToLower()) != "exit")
+            while ((input = Console.ReadLine()!.ToLower()) != "exit")
             {
                 if (!string.IsNullOrEmpty(input))
                 {
                     var result = ProcessCommand(input, farm, printer, fileManager);
                     if (!result)
-                        Console.WriteLine("\nInvalid command, box type or quantity. Try again.\n");
+                        Console.WriteLine("\nInvalid command. Try again.\n");
                 } 
                 else
                     Console.WriteLine("Input cannot be emty. Enter a valid command.");
 
-                Console.WriteLine("Enter a command (add [box type] [quantity] / remove [box type] [quantity] / exit): ");
+                Console.WriteLine("Enter a command (add [box type] [quantity] / remove [box type] [quantity] / boxadded [date (dd.mm.yyyy) ] / boxcountbydate [box type] / exit): ");
             }
 
             Console.WriteLine("Exiting the program...");
@@ -42,23 +44,41 @@
 
         static bool ProcessCommand(string input, Farm farm, FarmPrinter printer, FarmFileManager fileManager)
         {
-            if(!ConsoleUtility.CommandParser(input, out CommandParameters parameters))
+            if(!ConsoleParserUtility.CommandParser(input, out CommandParameters parameters))
                 return false;
 
             try
             {
-                if (parameters.Operation == ConsoleUtility.add)
-                    farm.AddBox(parameters.BoxType, parameters.Quantity);
-                else if (parameters.Operation == ConsoleUtility.remove)
-                    farm.RemoveBox(parameters.BoxType, parameters.Quantity);
-                else
-                    return false;
+                bool result = false;
 
-                printer.PrintInfo(parameters.Operation, parameters.Quantity, parameters.BoxType, farm);
+                switch (parameters.Operation)
+                {
+                    case ConsoleParserUtility.add:
+                        result = ConsoleHandlerUtility.HandleAddCommand(farm, printer, fileManager, parameters);
+                        break;
 
-                fileManager.SaveToFile(farm);
+                    case ConsoleParserUtility.remove:
+                        result = ConsoleHandlerUtility.HandleRemoveCommand(farm, printer, fileManager, parameters);
+                        
+                        if (!result)
+                            Console.WriteLine($"Not enough boxes of {parameters.BoxType} available.\n");
+                        break;
 
-                return true;
+                    case ConsoleParserUtility.boxAdded:
+                        printer.PrintBoxesAddedOnDate(farm, parameters.Date);
+                        result = true;
+                        break;
+
+                    case ConsoleParserUtility.boxCountByDate:
+                        printer.PrintBoxesCountByDate(farm, parameters.BoxType);
+                        result = true;
+                        break;
+
+                    default:
+                        return false;
+                }
+
+                return result;
 
             } catch (Exception ex)
             {

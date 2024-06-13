@@ -1,4 +1,4 @@
 ﻿namespace FarmApp
 {
-    public record FarmData(int FruitBoxes, int VeggieBoxes);
+    public record FarmData(List<Box> Boxes);
 }

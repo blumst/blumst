@@ -13,7 +13,7 @@ namespace FarmApp
 
         public void SaveToFile(Farm farm)
         {
-            var farmData = new FarmData(farm.FruitBoxes, farm.VeggieBoxes);
+            var farmData = new FarmData(farm.GetBoxes().ToList()) ;
 
             using (var writer = new StreamWriter(_filePath))
             {
@@ -29,13 +29,13 @@ namespace FarmApp
                 using(var reader = new StreamReader(_filePath))
                 {
                     var json = reader.ReadToEnd();
-                    return JsonSerializer.Deserialize<FarmData>(json);
+                    return JsonSerializer.Deserialize<FarmData>(json)!;
                 }
             }
             else
             {
-                var farmData = new FarmData(0, 0);
-                SaveToFile(new Farm(farmData.FruitBoxes, farmData.VeggieBoxes));
+                var farmData = new FarmData(new List<Box>());
+                SaveToFile(new Farm(farmData.Boxes));
                 return farmData;
             }
         }

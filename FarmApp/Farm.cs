@@ -1,50 +1,61 @@
-﻿namespace FarmApp
+﻿using System.Reflection.Metadata.Ecma335;
+
+namespace FarmApp
 {
     public class Farm
     {
-        public int FruitBoxes { get; private set; }
-        public int VeggieBoxes { get; private set; }
+        private List<Box> _boxes;
 
-        public Farm(int fruitBoxes, int veggieBoxes)
+        public Farm(List<Box> boxes)
         {
-            FruitBoxes = fruitBoxes;
-            VeggieBoxes = veggieBoxes;
+            _boxes = boxes;
         }
 
         public void AddBox(BoxType boxType, int quantity)
         {
-            switch(boxType)
+            var existingBox = _boxes.FirstOrDefault(x => x.BoxType == boxType);
+
+            if(existingBox != null)
+                existingBox.Quantity += quantity;
+            else
             {
-                case BoxType.Fruit:
-                    FruitBoxes += quantity;
-                    break;
-                case BoxType.Vegetable:
-                    VeggieBoxes += quantity;
-                    break;
-                default:
-                    throw new ArgumentException($"Unknown type of box - {boxType}.");
+                var box = new Box { BoxType = boxType, Quantity = quantity, DateAdded = DateTime.Now};
+                _boxes.Add(box);
             }
         }
 
-        public void RemoveBox(BoxType boxType, int quantity)
+        public bool RemoveBox(BoxType boxType, int quantity)
         {
-            switch (boxType)
-            {
-                case BoxType.Fruit:
-                    if (FruitBoxes >= quantity)
-                        FruitBoxes -= quantity;
-                    else
-                        throw new InvalidOperationException($"Not enough {boxType} boxes to remove.");
-                    break;
-                case BoxType.Vegetable:
-                    if (VeggieBoxes >= quantity)
-                        VeggieBoxes -= quantity;
-                    else
-                        throw new InvalidOperationException($"Not enough {boxType} boxes to remove.");
-                    break;
-                default:
-                    throw new ArgumentException("Unknown type of box.");
-            }
+            var existingBox = _boxes.FirstOrDefault(x => x.BoxType == boxType && x.Quantity >= quantity);
+
+            if (existingBox == null || existingBox.Quantity < quantity)
+                return false;
+
+            existingBox.Quantity -= quantity;
+
+            if (existingBox.Quantity <= 0)
+                _boxes.Remove(existingBox);
+
+            return true;
         }
+
+        public IEnumerable<Box> GetBoxes() => _boxes;
+
+        public int GetTotalBoxes(BoxType boxtype)
+        {  
+           if (_boxes == null)
+                return 0;
+
+            return _boxes.Where(x => x.BoxType == boxtype).Sum(x => x.Quantity);
+        }
+
+       
+
+        public int GetBoxesAddedOnDate(DateTime date) => _boxes.Where(x => x.DateAdded.Date == date.Date).Sum(x => x.Quantity);
+
+        public Dictionary<DateTime, int> GetBoxCountByDate(BoxType boxType) => _boxes
+            .Where(x => x.BoxType == boxType)
+            .GroupBy(x => x.DateAdded.Date)
+            .ToDictionary(i => i.Key, i => i.Sum(x => x.Quantity));
     }
 }
