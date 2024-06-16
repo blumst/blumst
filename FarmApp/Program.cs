@@ -44,7 +44,7 @@ namespace FarmApp
 
         static bool ProcessCommand(string input, Farm farm, FarmPrinter printer, FarmFileManager fileManager)
         {
-            if(!ConsoleParserUtility.CommandParser(input, out CommandParameters parameters))
+            if(!ConsoleParserUtility.TryParseCommandParameters(input, out CommandParametersContext parameters))
                 return false;
 
             try
@@ -53,23 +53,23 @@ namespace FarmApp
 
                 switch (parameters.Operation)
                 {
-                    case ConsoleParserUtility.add:
+                    case ConsoleParserUtility.Add:
                         result = ConsoleHandlerUtility.HandleAddCommand(farm, printer, fileManager, parameters);
                         break;
 
-                    case ConsoleParserUtility.remove:
+                    case ConsoleParserUtility.Remove:
                         result = ConsoleHandlerUtility.HandleRemoveCommand(farm, printer, fileManager, parameters);
                         
                         if (!result)
                             Console.WriteLine($"Not enough boxes of {parameters.BoxType} available.\n");
                         break;
 
-                    case ConsoleParserUtility.boxAdded:
+                    case ConsoleParserUtility.BoxAdded:
                         printer.PrintBoxesAddedOnDate(farm, parameters.Date);
                         result = true;
                         break;
 
-                    case ConsoleParserUtility.boxCountByDate:
+                    case ConsoleParserUtility.BoxCountByDate:
                         printer.PrintBoxesCountByDate(farm, parameters.BoxType);
                         result = true;
                         break;

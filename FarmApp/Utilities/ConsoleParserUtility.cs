@@ -2,38 +2,34 @@
 {
     public static class ConsoleParserUtility
     {
-        public const string add = "add";
-        public const string remove = "remove";
-        public const string boxAdded = "boxadded";
-        public const string boxCountByDate = "boxcountbydate";
+        public const string Add = "add";
+        public const string Remove = "remove";
+        public const string BoxAdded = "boxadded";
+        public const string BoxCountByDate = "boxcountbydate";
 
-        public static bool CommandParser(string input, out CommandParameters parameters)
+        public static bool TryParseCommandParameters(string input, out CommandParametersContext parameters)
         {
             parameters = null!;
             
             string[] command = input.Split(' ');
 
-            switch (command[0])
+            return command[0] switch
             {
-                case add or remove:
-                    return AddRemoveCommandsParser(command, out parameters);
-                case boxAdded:
-                    return BoxesAddedCommandParser(command, out parameters);
-                case boxCountByDate:
-                    return BoxCountByDateCommandParser(command, out parameters);
-                default:
-                    return false;
-            } 
+                Add or Remove => TryParseAddRemoveCommands(command, out parameters),
+                BoxAdded => TryParseBoxesAddedCommand(command, out parameters),
+                BoxCountByDate => TryParseBoxCountByDateCommand(command, out parameters),
+                _ => false,
+            };
         }
 
-        private static bool AddRemoveCommandsParser(string[] command, out CommandParameters parameters)
+        private static bool TryParseAddRemoveCommands(string[] command, out CommandParametersContext parameters)
         {
             parameters = null!;
 
             if(command.Length != 3 || !int.TryParse(command[2], out int quantity) || !Enum.TryParse(command[1], true, out BoxType boxtype))
                 return false;
 
-            parameters = new CommandParameters()
+            parameters = new CommandParametersContext()
             {
                 Operation = command[0],
                 BoxType = boxtype,
@@ -43,32 +39,32 @@
             return true;
         }
 
-        private static bool BoxesAddedCommandParser(string[] command, out CommandParameters parameters)
+        private static bool TryParseBoxesAddedCommand(string[] command, out CommandParametersContext parameters)
         {
             parameters = null!;
 
             if (command.Length != 2 || !DateTime.TryParse(command[1], out DateTime date))
                 return false;
 
-            parameters = new CommandParameters()
+            parameters = new CommandParametersContext()
             {
-                Operation = boxAdded,
+                Operation = BoxAdded,
                 Date = date
             };
 
             return true;
         }
 
-        private static bool BoxCountByDateCommandParser(string[] command, out CommandParameters parameters)
+        private static bool TryParseBoxCountByDateCommand(string[] command, out CommandParametersContext parameters)
         {
             parameters = null!;
 
             if(command.Length != 2 || !Enum.TryParse(command[1], true, out BoxType boxType))
                 return false;
 
-            parameters = new CommandParameters()
+            parameters = new CommandParametersContext()
             {
-                Operation = boxCountByDate,
+                Operation = BoxCountByDate,
                 BoxType = boxType
             };
 

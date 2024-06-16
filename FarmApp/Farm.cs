@@ -1,10 +1,8 @@
-﻿using System.Reflection.Metadata.Ecma335;
-
-namespace FarmApp
+﻿namespace FarmApp
 {
     public class Farm
     {
-        private List<Box> _boxes;
+        private readonly List<Box> _boxes;
 
         public Farm(List<Box> boxes)
         {
@@ -29,7 +27,7 @@ namespace FarmApp
             var existingBox = _boxes.FirstOrDefault(x => x.BoxType == boxType && x.Quantity >= quantity);
 
             if (existingBox == null || existingBox.Quantity < quantity)
-                return false;
+                throw new InvalidOperationException("Not enough quantity in the box.");
 
             existingBox.Quantity -= quantity;
 
@@ -48,8 +46,6 @@ namespace FarmApp
 
             return _boxes.Where(x => x.BoxType == boxtype).Sum(x => x.Quantity);
         }
-
-       
 
         public int GetBoxesAddedOnDate(DateTime date) => _boxes.Where(x => x.DateAdded.Date == date.Date).Sum(x => x.Quantity);
 

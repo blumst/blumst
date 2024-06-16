@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
 namespace FarmApp
 {
@@ -15,22 +10,18 @@ namespace FarmApp
         {
             var farmData = new FarmData(farm.GetBoxes().ToList()) ;
 
-            using (var writer = new StreamWriter(_filePath))
-            {
-                var json = JsonSerializer.Serialize(farmData);
-                writer.Write(json);
-            }
+            using var writer = new StreamWriter(_filePath);
+            var json = JsonSerializer.Serialize(farmData);
+            writer.Write(json);
         }
 
         public FarmData LoadFromFile()
         {
             if(File.Exists(_filePath))
             {
-                using(var reader = new StreamReader(_filePath))
-                {
-                    var json = reader.ReadToEnd();
-                    return JsonSerializer.Deserialize<FarmData>(json)!;
-                }
+                using var reader = new StreamReader(_filePath);
+                var json = reader.ReadToEnd();
+                return JsonSerializer.Deserialize<FarmData>(json)!;
             }
             else
             {

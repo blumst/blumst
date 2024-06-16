@@ -1,6 +1,6 @@
 ﻿namespace FarmApp
 {
-    public class CommandParameters
+    public class CommandParametersContext
     {
         public string? Operation {  get; set; }
         public BoxType BoxType { get; set; }
