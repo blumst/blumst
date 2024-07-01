@@ -4,14 +4,16 @@ using System.Drawing;
 
 namespace Image_Processing_Pipeline.Classes.Steps
 {
-    public class ImageWatermarkingStep : IPipelineStep
+    public class ImageWatermarkingStep : IPipelineStep, IStepPrototype
     {
-        public async Task ExecuteAsync(IPipelineContext context)
+        public async Task ExecuteAsync(IPipelineContext context, CancellationToken token)
         {
             const string Font = "Times New Roman";
 
             await Task.Run(() =>
             {
+                token.ThrowIfCancellationRequested();
+
                 using var graphics = Graphics.FromImage(context.Image);
 
                 string watermarkString = context.Watermark;
@@ -35,7 +37,9 @@ namespace Image_Processing_Pipeline.Classes.Steps
 
                 graphics.Transform = matrix;
                 graphics.DrawString(watermarkString, font, brush, 0, 0, format);
-            });
+            }, token);
         }
+
+        public IPipelineStep Clone() => new ImageWatermarkingStep();
     }
 }

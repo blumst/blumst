@@ -1,16 +1,20 @@
 ﻿using Image_Processing_Pipeline.Interfaces;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 
 namespace Image_Processing_Pipeline.Classes
 {
-    public class ImageReversingStep : IPipelineStep
+    public class ImageReversingStep : IPipelineStep, IStepPrototype
     {
-        public async Task ExecuteAsync(IPipelineContext context)
+        public async Task ExecuteAsync(IPipelineContext context, CancellationToken token)
         {
-            await Task.Run(() => 
-                context.Image.RotateFlip(RotateFlipType.RotateNoneFlipX));
+            await Task.Run(() =>
+            {
+                token.ThrowIfCancellationRequested();
+
+                context.Image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+            }, token);
         }
+
+        public IPipelineStep Clone() => new ImageReversingStep();
     }
 }

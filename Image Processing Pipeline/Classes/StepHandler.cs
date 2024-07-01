@@ -14,83 +14,33 @@ namespace Image_Processing_Pipeline.Classes
             _context = context;
         }
 
-        public void HandleUserChoice(string choice)
+        public void AddFilterStep()
         {
-            try
-            {
-                switch (choice)
-                {
-                    case "1":
-                        AddFilterStep();
-                        break;
-                    case "2":
-                        AddResizeStep();
-                        break;
-                    case "3":
-                        AddReverseStep();
-                        break;
-                    case "4":
-                        AddRotateStep();
-                        break;
-                    case "5":
-                        AddWatermarkStep();
-                        break;
-                    default:
-                        Console.WriteLine("\nInvalid choice, please select a valid option.\n");
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"\nAn error occurred: {ex.Message}");
-            }
+            _pipeline.AddStep(new ImageFilteringStep().Clone());
         }
 
-        private void AddFilterStep()
+        public void AddResizeStep(int width, int height)
         {
-            _pipeline.AddStep(new ImageFilteringStep());
-            Console.WriteLine("\nFilter added.\n");
-        }
-
-        private void AddResizeStep()
-        {
-            var userInputHandler = new UserInputHandler();
-            int width = UserInputHandler.GetIntegerInput("\nEnter the width to resize:");
-            int height = UserInputHandler.GetIntegerInput("\nEnter the height to resize:");
-
             _context.Width = width;
             _context.Height = height;
-
-            _pipeline.AddStep(new ImageResizingStep());
-            Console.WriteLine("\nImage resized.\n");
+            _pipeline.AddStep(new ImageResizingStep().Clone());
         }
 
-        private void AddReverseStep()
+        public void AddReverseStep()
         {
-            _pipeline.AddStep(new ImageReversingStep());
-            Console.WriteLine("\nImage reversed.\n");
+            _pipeline.AddStep(new ImageReversingStep().Clone());
         }
 
-        private void AddRotateStep()
+        public void AddRotateStep(int degrees)
         {
-            var userInputHandler = new UserInputHandler();
-            int degrees = UserInputHandler.GetIntegerInput("\nEnter the degrees to rotate: ");
-
             _context.Degrees = degrees;
-
-            _pipeline.AddStep(new ImageRotatingStep());
-            Console.WriteLine("\nImage rotated.\n");
+            _pipeline.AddStep(new ImageRotatingStep().Clone());
         }
 
-        private void AddWatermarkStep()
+        public void AddWatermarkStep(string watermark)
         {
-            var userInputHandler = new UserInputHandler();
-            string watermark = UserInputHandler.GetStringInput("\nEnter the watermark text: ");
-
             _context.Watermark = watermark;
-
-            _pipeline.AddStep(new ImageWatermarkingStep());
-            Console.WriteLine("\nWatermark added.\n");
+            _pipeline.AddStep(new ImageWatermarkingStep().Clone());
         }
     }
 }

@@ -16,11 +16,12 @@ namespace Image_Processing_Pipeline.Classes
             _steps.Add(step);
         }
 
-        public async Task ExecutePipelineAsync(IPipelineContext context)
+        public async Task ExecutePipelineAsync(IPipelineContext context, CancellationToken token)
         {
             foreach (var step in _steps)
             {
-                await step.ExecuteAsync(context);
+                await step.ExecuteAsync(context, token);
+                token.ThrowIfCancellationRequested();
             }
         }
     }

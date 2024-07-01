@@ -2,6 +2,6 @@
 {
     public interface IPipelineStep
     {
-        Task ExecuteAsync(IPipelineContext context);
+        Task ExecuteAsync(IPipelineContext context, CancellationToken token);
     }
 }

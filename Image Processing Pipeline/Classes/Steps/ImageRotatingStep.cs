@@ -3,12 +3,14 @@ using System.Drawing;
 
 namespace Image_Processing_Pipeline.Classes
 {
-    public class ImageRotatingStep : IPipelineStep
+    public class ImageRotatingStep : IPipelineStep, IStepPrototype
     {
-        public async Task ExecuteAsync(IPipelineContext context)
+        public async Task ExecuteAsync(IPipelineContext context, CancellationToken token)
         {
             await Task.Run(() =>
             {
+                token.ThrowIfCancellationRequested();
+
                 Bitmap rotatedImage = new Bitmap(context.Image.Width, context.Image.Height);
 
                 using var graphics = Graphics.FromImage(rotatedImage);
@@ -19,7 +21,9 @@ namespace Image_Processing_Pipeline.Classes
                 graphics.DrawImage(context.Image, new Point(0, 0));
 
                 context.Image = rotatedImage;
-            });
+            }, token);
         }
+
+        public IPipelineStep Clone() => new ImageRotatingStep();
     }
 }

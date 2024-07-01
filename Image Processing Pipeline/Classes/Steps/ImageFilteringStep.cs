@@ -6,12 +6,14 @@ using System.Runtime.InteropServices;
 
 namespace Image_Processing_Pipeline.Classes
 {
-    internal class ImageFilteringStep : IPipelineStep
+    public class ImageFilteringStep : IPipelineStep, IStepPrototype
     {
-        public async Task ExecuteAsync(IPipelineContext context)
+        public async Task ExecuteAsync(IPipelineContext context, CancellationToken token)
         {
             await Task.Run(() =>
             {
+                token.ThrowIfCancellationRequested();
+
                 Rectangle rect = new(0, 0, context.Image.Width, context.Image.Height);
                 BitmapData bmpData = context.Image.LockBits(rect, ImageLockMode.ReadWrite, context.Image.PixelFormat);
 
@@ -34,7 +36,9 @@ namespace Image_Processing_Pipeline.Classes
                 Marshal.Copy(rgbValues, 0, ptr, bytes);
 
                 context.Image.UnlockBits(bmpData);
-            });
+            }, token);
         }
+
+        public IPipelineStep Clone() => new ImageFilteringStep();
     }
 }
