@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using StockWebApp1.Models;
 
 namespace StockWebApp1
 {
@@ -9,5 +10,12 @@ namespace StockWebApp1
         {
             
         }
+
+        public DbSet<User> Users { get; set; }
+        public DbSet<Content> Content { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Rating> Rating { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
     }
 }
