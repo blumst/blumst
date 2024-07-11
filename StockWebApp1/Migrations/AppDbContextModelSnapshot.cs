@@ -78,6 +78,21 @@ namespace StockWebApp1.Migrations
                     b.ToTable("Content");
                 });
 
+            modelBuilder.Entity("StockWebApp1.Models.ContentTag", b =>
+                {
+                    b.Property<int>("ContentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ContentId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("ContentTag");
+                });
+
             modelBuilder.Entity("StockWebApp1.Models.Rating", b =>
                 {
                     b.Property<int>("RatingId")
@@ -104,6 +119,24 @@ namespace StockWebApp1.Migrations
                     b.ToTable("Rating");
                 });
 
+            modelBuilder.Entity("StockWebApp1.Models.Subscriber", b =>
+                {
+                    b.Property<int>("SubscriberId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SubscriberId"));
+
+                    b.Property<int>("SubscriberInfoUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("SubscriberId");
+
+                    b.HasIndex("SubscriberInfoUserId");
+
+                    b.ToTable("Subscribers");
+                });
+
             modelBuilder.Entity("StockWebApp1.Models.Subscription", b =>
                 {
                     b.Property<int>("SubscriptionId")
@@ -112,17 +145,12 @@ namespace StockWebApp1.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SubscriptionId"));
 
-                    b.Property<int>("SubscribedToId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SubscriberId")
+                    b.Property<int>("SubscriptionInfoUserId")
                         .HasColumnType("integer");
 
                     b.HasKey("SubscriptionId");
 
-                    b.HasIndex("SubscribedToId");
-
-                    b.HasIndex("SubscriberId");
+                    b.HasIndex("SubscriptionInfoUserId");
 
                     b.ToTable("Subscriptions");
                 });
@@ -135,16 +163,11 @@ namespace StockWebApp1.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TagId"));
 
-                    b.Property<int?>("ContentId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("TagName")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("TagId");
-
-                    b.HasIndex("ContentId");
 
                     b.ToTable("Tags");
                 });
@@ -207,6 +230,25 @@ namespace StockWebApp1.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("StockWebApp1.Models.ContentTag", b =>
+                {
+                    b.HasOne("StockWebApp1.Models.Content", "Content")
+                        .WithMany("ContentTags")
+                        .HasForeignKey("ContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StockWebApp1.Models.Tag", "Tag")
+                        .WithMany("ContentTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Content");
+
+                    b.Navigation("Tag");
+                });
+
             modelBuilder.Entity("StockWebApp1.Models.Rating", b =>
                 {
                     b.HasOne("StockWebApp1.Models.Content", "Content")
@@ -226,39 +268,40 @@ namespace StockWebApp1.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("StockWebApp1.Models.Subscription", b =>
+            modelBuilder.Entity("StockWebApp1.Models.Subscriber", b =>
                 {
-                    b.HasOne("StockWebApp1.Models.User", "SubscribedTo")
+                    b.HasOne("StockWebApp1.Models.User", "SubscriberInfo")
                         .WithMany("Subscribers")
-                        .HasForeignKey("SubscribedToId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("SubscriberInfoUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StockWebApp1.Models.User", "Subscriber")
-                        .WithMany("Subscriptions")
-                        .HasForeignKey("SubscriberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("SubscribedTo");
-
-                    b.Navigation("Subscriber");
+                    b.Navigation("SubscriberInfo");
                 });
 
-            modelBuilder.Entity("StockWebApp1.Models.Tag", b =>
+            modelBuilder.Entity("StockWebApp1.Models.Subscription", b =>
                 {
-                    b.HasOne("StockWebApp1.Models.Content", null)
-                        .WithMany("Tags")
-                        .HasForeignKey("ContentId");
+                    b.HasOne("StockWebApp1.Models.User", "SubscriptionInfo")
+                        .WithMany("Subscriptions")
+                        .HasForeignKey("SubscriptionInfoUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SubscriptionInfo");
                 });
 
             modelBuilder.Entity("StockWebApp1.Models.Content", b =>
                 {
                     b.Navigation("Comments");
 
-                    b.Navigation("Ratings");
+                    b.Navigation("ContentTags");
 
-                    b.Navigation("Tags");
+                    b.Navigation("Ratings");
+                });
+
+            modelBuilder.Entity("StockWebApp1.Models.Tag", b =>
+                {
+                    b.Navigation("ContentTags");
                 });
 
             modelBuilder.Entity("StockWebApp1.Models.User", b =>

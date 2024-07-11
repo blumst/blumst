@@ -13,6 +13,19 @@ namespace StockWebApp1.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    TagId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TagName = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.TagId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -50,29 +63,41 @@ namespace StockWebApp1.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Subscribers",
+                columns: table => new
+                {
+                    SubscriberId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SubscriberInfoUserId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subscribers", x => x.SubscriberId);
+                    table.ForeignKey(
+                        name: "FK_Subscribers_Users_SubscriberInfoUserId",
+                        column: x => x.SubscriberInfoUserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Subscriptions",
                 columns: table => new
                 {
                     SubscriptionId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SubscriberId = table.Column<int>(type: "integer", nullable: false),
-                    SubscribedToId = table.Column<int>(type: "integer", nullable: false)
+                    SubscriptionInfoUserId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Subscriptions", x => x.SubscriptionId);
                     table.ForeignKey(
-                        name: "FK_Subscriptions_Users_SubscribedToId",
-                        column: x => x.SubscribedToId,
+                        name: "FK_Subscriptions_Users_SubscriptionInfoUserId",
+                        column: x => x.SubscriptionInfoUserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Subscriptions_Users_SubscriberId",
-                        column: x => x.SubscriberId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -104,6 +129,30 @@ namespace StockWebApp1.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ContentTag",
+                columns: table => new
+                {
+                    ContentId = table.Column<int>(type: "integer", nullable: false),
+                    TagId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContentTag", x => new { x.ContentId, x.TagId });
+                    table.ForeignKey(
+                        name: "FK_ContentTag_Content_ContentId",
+                        column: x => x.ContentId,
+                        principalTable: "Content",
+                        principalColumn: "ContentId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ContentTag_Tags_TagId",
+                        column: x => x.TagId,
+                        principalTable: "Tags",
+                        principalColumn: "TagId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Rating",
                 columns: table => new
                 {
@@ -130,25 +179,6 @@ namespace StockWebApp1.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Tags",
-                columns: table => new
-                {
-                    TagId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    TagName = table.Column<string>(type: "text", nullable: false),
-                    ContentId = table.Column<int>(type: "integer", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tags", x => x.TagId);
-                    table.ForeignKey(
-                        name: "FK_Tags_Content_ContentId",
-                        column: x => x.ContentId,
-                        principalTable: "Content",
-                        principalColumn: "ContentId");
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_ContentId",
                 table: "Comments",
@@ -165,6 +195,11 @@ namespace StockWebApp1.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ContentTag_TagId",
+                table: "ContentTag",
+                column: "TagId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Rating_ContentId",
                 table: "Rating",
                 column: "ContentId");
@@ -175,19 +210,14 @@ namespace StockWebApp1.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Subscriptions_SubscribedToId",
-                table: "Subscriptions",
-                column: "SubscribedToId");
+                name: "IX_Subscribers_SubscriberInfoUserId",
+                table: "Subscribers",
+                column: "SubscriberInfoUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Subscriptions_SubscriberId",
+                name: "IX_Subscriptions_SubscriptionInfoUserId",
                 table: "Subscriptions",
-                column: "SubscriberId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tags_ContentId",
-                table: "Tags",
-                column: "ContentId");
+                column: "SubscriptionInfoUserId");
         }
 
         /// <inheritdoc />
@@ -197,7 +227,13 @@ namespace StockWebApp1.Migrations
                 name: "Comments");
 
             migrationBuilder.DropTable(
+                name: "ContentTag");
+
+            migrationBuilder.DropTable(
                 name: "Rating");
+
+            migrationBuilder.DropTable(
+                name: "Subscribers");
 
             migrationBuilder.DropTable(
                 name: "Subscriptions");

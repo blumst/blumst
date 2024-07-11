@@ -9,6 +9,6 @@
         public DateTime DateCreated { get; set; }
         public ICollection<Content> Contents { get; set; }
         public ICollection<Subscription> Subscriptions { get; set; }
-        public ICollection<Subscription> Subscribers { get; set; }
+        public ICollection<Subscriber> Subscribers { get; set; }
     }
 }
