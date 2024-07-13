@@ -12,19 +12,17 @@ namespace StockWebApp1
         }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<Content> Content { get; set; }
+        public DbSet<Content> Contents { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Rating> Rating { get; set; }
         public DbSet<Tag> Tags { get; set; }
-        public DbSet<Subscriber> Subscribers { get; set; }
-        public DbSet<Subscription> Subscriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<ContentTag>()
-                .HasKey(ct => new { ct.ContentId, ct.TagId }); 
+                .HasKey(ct => new { ct.ContentId, ct.TagId });
 
             modelBuilder.Entity<ContentTag>()
                 .HasOne(ct => ct.Content)
@@ -35,6 +33,14 @@ namespace StockWebApp1
                 .HasOne(ct => ct.Tag)
                 .WithMany(t => t.ContentTags)
                 .HasForeignKey(ct => ct.TagId);
+
+            modelBuilder.Entity<User>()
+               .HasMany(u => u.Subscriptions)
+               .WithMany(u => u.Subscribers)
+               .UsingEntity<Dictionary<string, object>>(
+                   "UserSubscription",
+                   j => j.HasOne<User>().WithMany().HasForeignKey("SubscriberId"),
+                   j => j.HasOne<User>().WithMany().HasForeignKey("SubscriptionId"));
         }
 
     }

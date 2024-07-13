@@ -24,11 +24,11 @@ namespace StockWebApp1.Migrations
 
             modelBuilder.Entity("StockWebApp1.Models.Comment", b =>
                 {
-                    b.Property<int>("CommentId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CommentId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContentId")
                         .HasColumnType("integer");
@@ -43,7 +43,7 @@ namespace StockWebApp1.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
-                    b.HasKey("CommentId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ContentId");
 
@@ -54,11 +54,11 @@ namespace StockWebApp1.Migrations
 
             modelBuilder.Entity("StockWebApp1.Models.Content", b =>
                 {
-                    b.Property<int>("ContentId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ContentId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -71,11 +71,11 @@ namespace StockWebApp1.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
-                    b.HasKey("ContentId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Content");
+                    b.ToTable("Contents");
                 });
 
             modelBuilder.Entity("StockWebApp1.Models.ContentTag", b =>
@@ -95,11 +95,11 @@ namespace StockWebApp1.Migrations
 
             modelBuilder.Entity("StockWebApp1.Models.Rating", b =>
                 {
-                    b.Property<int>("RatingId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RatingId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContentId")
                         .HasColumnType("integer");
@@ -110,7 +110,7 @@ namespace StockWebApp1.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
-                    b.HasKey("RatingId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ContentId");
 
@@ -119,66 +119,30 @@ namespace StockWebApp1.Migrations
                     b.ToTable("Rating");
                 });
 
-            modelBuilder.Entity("StockWebApp1.Models.Subscriber", b =>
-                {
-                    b.Property<int>("SubscriberId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SubscriberId"));
-
-                    b.Property<int>("SubscriberInfoUserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("SubscriberId");
-
-                    b.HasIndex("SubscriberInfoUserId");
-
-                    b.ToTable("Subscribers");
-                });
-
-            modelBuilder.Entity("StockWebApp1.Models.Subscription", b =>
-                {
-                    b.Property<int>("SubscriptionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SubscriptionId"));
-
-                    b.Property<int>("SubscriptionInfoUserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("SubscriptionId");
-
-                    b.HasIndex("SubscriptionInfoUserId");
-
-                    b.ToTable("Subscriptions");
-                });
-
             modelBuilder.Entity("StockWebApp1.Models.Tag", b =>
                 {
-                    b.Property<int>("TagId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TagId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("TagName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("TagId");
+                    b.HasKey("Id");
 
                     b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("StockWebApp1.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
@@ -195,9 +159,24 @@ namespace StockWebApp1.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("UserSubscription", b =>
+                {
+                    b.Property<int>("SubscriberId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SubscriptionId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("SubscriberId", "SubscriptionId");
+
+                    b.HasIndex("SubscriptionId");
+
+                    b.ToTable("UserSubscription");
                 });
 
             modelBuilder.Entity("StockWebApp1.Models.Comment", b =>
@@ -268,26 +247,19 @@ namespace StockWebApp1.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("StockWebApp1.Models.Subscriber", b =>
+            modelBuilder.Entity("UserSubscription", b =>
                 {
-                    b.HasOne("StockWebApp1.Models.User", "SubscriberInfo")
-                        .WithMany("Subscribers")
-                        .HasForeignKey("SubscriberInfoUserId")
+                    b.HasOne("StockWebApp1.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("SubscriberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("SubscriberInfo");
-                });
-
-            modelBuilder.Entity("StockWebApp1.Models.Subscription", b =>
-                {
-                    b.HasOne("StockWebApp1.Models.User", "SubscriptionInfo")
-                        .WithMany("Subscriptions")
-                        .HasForeignKey("SubscriptionInfoUserId")
+                    b.HasOne("StockWebApp1.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("SubscriptionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("SubscriptionInfo");
                 });
 
             modelBuilder.Entity("StockWebApp1.Models.Content", b =>
@@ -307,10 +279,6 @@ namespace StockWebApp1.Migrations
             modelBuilder.Entity("StockWebApp1.Models.User", b =>
                 {
                     b.Navigation("Contents");
-
-                    b.Navigation("Subscribers");
-
-                    b.Navigation("Subscriptions");
                 });
 #pragma warning restore 612, 618
         }
