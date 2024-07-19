@@ -1,10 +1,10 @@
 ﻿namespace StockWebApp1.Models
 {
-    public class ContentTag
+    public class ContentTag : BaseModel
     {
-        public int ContentId { get; set; }
+        public Guid ContentId { get; set; }
         public Content Content { get; set; }
-        public int TagId { get; set; }
+        public Guid TagId { get; set; }
         public Tag Tag { get; set; }
     }
 }
