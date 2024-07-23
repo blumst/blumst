@@ -49,7 +49,7 @@ namespace StockWebApp1.Controllers
             if (id != comment.Id)
                 return BadRequest();
 
-            await _commentRepository.Update(comment);
+            _commentRepository.Update(comment);
 
             return NoContent();
         }
