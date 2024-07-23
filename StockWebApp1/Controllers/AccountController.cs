@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using StockWebApp1.Models;
@@ -9,23 +10,26 @@ namespace StockWebApp1.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IMapper _mapper;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _mapper = mapper;
         }
 
         [HttpPost]
         [AllowAnonymous]
-        [Route("RegisterUser")]
-        public  async Task<IActionResult> Register([FromBody] User model)
+        [Route("users")]
+        public  async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    var user = new User { UserName = model.Email, Email = model.Email, DateCreated = DateTime.UtcNow };
+                    var user = _mapper.Map<User>(model);
+                    user.DateCreated = DateTime.UtcNow;
                     var result = await _userManager.CreateAsync(user, model.PasswordHash);
 
                     return !result.Succeeded
@@ -42,15 +46,15 @@ namespace StockWebApp1.Controllers
         }
 
         [HttpPost]
-        [Route("Login")]
+        [Route("sessions")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] User model)
+        public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    var result = await _signInManager.PasswordSignInAsync(model.Email, model.PasswordHash, isPersistent: true, lockoutOnFailure: false);
+                    var result = await _signInManager.PasswordSignInAsync(model.UserName, model.PasswordHash, isPersistent: true, lockoutOnFailure: false);
 
                     return !result.Succeeded
                             ? new BadRequestObjectResult("Invalid login attempt.")
@@ -65,7 +69,7 @@ namespace StockWebApp1.Controllers
         }
 
         [HttpPost]
-        [Route("Logout")]
+        [Route("sessions/current")]
         [Authorize]
         public async Task<IActionResult> Logout()
         {
@@ -75,7 +79,7 @@ namespace StockWebApp1.Controllers
         }
 
         [HttpGet]
-        [Route("Profile")]
+        [Route("users/profile")]
         [Authorize]
         public async Task<IActionResult> Profile()
         {

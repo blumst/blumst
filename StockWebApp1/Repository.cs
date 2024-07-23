@@ -20,19 +20,21 @@ namespace StockWebApp1.Interfaces
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(T entity)
+        public void Update(T entity)
         {
              _context.Entry(entity).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Guid id)
         {
             var entity = await GetByIdAsync(id);
             _dbSet.Remove(entity);
+        }
+
+        public async Task SaveChangesAsync()
+        {
             await _context.SaveChangesAsync();
         }
     }

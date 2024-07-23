@@ -37,6 +37,8 @@ namespace StockWebApp1.Controllers
         public async Task<IActionResult> Create(User user)
         {
             await _userRepository.AddAsync(user);
+            await _userRepository.SaveChangesAsync();
+
             var routeValues = new { id = user.Id };
 
             return CreatedAtAction(nameof(GetById), routeValues, user);
@@ -49,7 +51,8 @@ namespace StockWebApp1.Controllers
             if (id != user.Id)
                 return BadRequest();
 
-            await _userRepository.UpdateAsync(user);
+            _userRepository.Update(user);
+            await _userRepository.SaveChangesAsync();
 
             return NoContent();
         }
@@ -63,6 +66,7 @@ namespace StockWebApp1.Controllers
                 return NotFound();
 
             await _userRepository.DeleteAsync(id);
+            await _userRepository.SaveChangesAsync();
 
             return NoContent();
         }

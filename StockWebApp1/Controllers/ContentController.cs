@@ -49,7 +49,7 @@ namespace StockWebApp1.Controllers
             if (id != content.Id)
                 return BadRequest();
 
-            await _contentRepository.UpdateAsync(content);
+            await _contentRepository.Update(content);
 
             return NoContent();
         }

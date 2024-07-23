@@ -37,6 +37,8 @@ namespace StockWebApp1.Controllers
         public async Task<IActionResult> Create(Rating rating)
         {
             await _ratingRepository.AddAsync(rating);
+            await _ratingRepository.SaveChangesAsync();
+
             var routeValues = new { id = rating.Id };
 
             return CreatedAtAction(nameof(GetById), routeValues, rating);
@@ -49,7 +51,8 @@ namespace StockWebApp1.Controllers
             if (id != rating.Id)
                 return BadRequest();
 
-            await _ratingRepository.UpdateAsync(rating);
+            _ratingRepository.Update(rating);
+            await _ratingRepository.SaveChangesAsync();
 
             return NoContent();
         }
@@ -63,6 +66,7 @@ namespace StockWebApp1.Controllers
                 return NotFound();
 
             await _ratingRepository.DeleteAsync(id);
+            await _ratingRepository.SaveChangesAsync();
 
             return NoContent();
         }

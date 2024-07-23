@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StockWebApp1.Interfaces;
@@ -31,6 +32,15 @@ namespace StockWebApp1
                 options.Password.RequiredLength = 6;
                 options.Password.RequiredUniqueChars = 1;
             });
+
+            var config = new MapperConfiguration(cfg => {
+                cfg.CreateMap<User, LoginDto>();
+                cfg.CreateMap<User, RegisterDto>();
+            });
+
+            IMapper mapper = config.CreateMapper();
+
+            builder.Services.AddSingleton(mapper);
 
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 

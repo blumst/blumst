@@ -37,6 +37,8 @@ namespace StockWebApp1.Controllers
         public async Task<IActionResult> Create(Tag tag)
         {
             await _tagRepository.AddAsync(tag);
+            await _tagRepository.SaveChangesAsync();
+
             var routeValues = new { id = tag.Id };
 
             return CreatedAtAction(nameof(GetById), routeValues, tag);
@@ -49,7 +51,8 @@ namespace StockWebApp1.Controllers
             if (id != tag.Id)
                 return BadRequest();
 
-            await _tagRepository.UpdateAsync(tag);
+            _tagRepository.Update(tag);
+            await _tagRepository.SaveChangesAsync();
 
             return NoContent();
         }
@@ -63,6 +66,7 @@ namespace StockWebApp1.Controllers
                 return NotFound();
 
             await _tagRepository.DeleteAsync(id);
+            await _tagRepository.SaveChangesAsync();
 
             return NoContent();
         }
