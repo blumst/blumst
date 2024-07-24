@@ -1,6 +1,6 @@
-﻿namespace StockWebApp1.Models
+﻿namespace StockWebApp1.DTO
 {
-    public class RegisterDto
+    public class LoginDto
     {
         public string UserName { get; set; }
         public string PasswordHash { get; set; }

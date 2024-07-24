@@ -1,8 +1,11 @@
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using StockWebApp1.DTO;
 using StockWebApp1.Interfaces;
 using StockWebApp1.Models;
+using StockWebApp1.Validators;
 
 namespace StockWebApp1
 {
@@ -12,7 +15,8 @@ namespace StockWebApp1
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddFluentValidation(validator =>
+                    validator.RegisterValidatorsFromAssemblyContaining<RegistrationValidator>()); ;
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -34,8 +38,13 @@ namespace StockWebApp1
             });
 
             var config = new MapperConfiguration(cfg => {
-                cfg.CreateMap<User, LoginDto>();
-                cfg.CreateMap<User, RegisterDto>();
+                cfg.CreateMap<User, LoginDto>().ReverseMap();
+                cfg.CreateMap<User, RegisterDto>().ReverseMap();
+                cfg.CreateMap<User, UserDto>().ReverseMap();
+                cfg.CreateMap<Tag, TagDto>().ReverseMap();
+                cfg.CreateMap<Rating, RatingDto>().ReverseMap();
+                cfg.CreateMap<Content, ContentDto>().ReverseMap();
+                cfg.CreateMap<Comment, CommentDto>().ReverseMap();
             });
 
             IMapper mapper = config.CreateMapper();

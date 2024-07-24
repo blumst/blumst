@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using StockWebApp1.Interfaces;
-using StockWebApp1.Models;
+using StockWebApp1.DTO;
+using StockWebApp1.Services;
 
 namespace StockWebApp1.Controllers
 {
@@ -8,62 +8,45 @@ namespace StockWebApp1.Controllers
     [ApiController]
     public class ContentController : ControllerBase
     {
-        private readonly IRepository<Content> _contentRepository;
+        private readonly ContentService _contentService;
 
-        public ContentController(IRepository<Content> contentRepository)
-        {
-            _contentRepository = contentRepository;
-        }
+        public ContentController(ContentService contentService) => _contentService = contentService;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var user = await _contentRepository.GetAllAsync();
-            return Ok(user);
+            var content = await _contentService.GetAllContentAsync();
+            return Ok(content);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var content = await _contentRepository.GetByIdAsync(id);
-
-            if (content == null)
-                return NotFound(new { Message = "Content has not been found." });
-
+            var content = await _contentService.GetContentByIdAsync(id);
             return Ok(content);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Content content)
+        public async Task<IActionResult> Create(ContentDto contentDto)
         {
-            await _contentRepository.AddAsync(content);
-            var routeValues = new { id = content.Id };
+            await _contentService.CreateContentAsync(contentDto);
+            var routeValues = new { id = contentDto.Id };
 
-            return CreatedAtAction(nameof(GetById), routeValues, content);
+            return CreatedAtAction(nameof(GetById), routeValues, contentDto);
 
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, Content content)
+        public async Task<IActionResult> Update(Guid id, ContentDto contentDto)
         {
-            if (id != content.Id)
-                return BadRequest();
-
-            _contentRepository.Update(content);
-
+            await _contentService.UpdateContentAsync(id, contentDto);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var content = await _contentRepository.GetByIdAsync(id);
-
-            if (content == null)
-                return NotFound();
-
-            await _contentRepository.DeleteAsync(id);
-
+            await _contentService.DeleteContentAsync(id);
             return NoContent();
         }
     }

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using StockWebApp1.Interfaces;
+using StockWebApp1.DTO;
 using StockWebApp1.Models;
 
 namespace StockWebApp1.Controllers
@@ -8,66 +8,45 @@ namespace StockWebApp1.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IRepository<User> _userRepository;
+        private readonly UserService _userService;
 
-        public UserController(IRepository<User> userRepository)
-        {
-            _userRepository = userRepository;
-        }
+        public UserController(UserService userService) => _userService = userService;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var user = await _userRepository.GetAllAsync(); 
+            var user = await _userService.GetAllUserAsync(); 
             return Ok(user);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var user = await _userRepository.GetByIdAsync(id);
-
-            if (user == null)
-                return NotFound(new { Message = "User has not been found." });
-
+            var user = await _userService.GetUserByIdAsync(id);
             return Ok(user);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(User user)
+        public async Task<IActionResult> Create(UserDto userDto)
         {
-            await _userRepository.AddAsync(user);
-            await _userRepository.SaveChangesAsync();
+            await _userService.CreateUserAsync(userDto);
+            var routeValues = new { id = userDto.Id };
 
-            var routeValues = new { id = user.Id };
-
-            return CreatedAtAction(nameof(GetById), routeValues, user);
+            return CreatedAtAction(nameof(GetById), routeValues, userDto);
 
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, User user)
+        public async Task<IActionResult> Update(Guid id, UserDto userDto)
         {
-            if (id != user.Id)
-                return BadRequest();
-
-            _userRepository.Update(user);
-            await _userRepository.SaveChangesAsync();
-
+            await _userService.UpdateUserAsync(id, userDto);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var user = await _userRepository.GetByIdAsync(id);
-
-            if (user == null)
-                return NotFound();
-
-            await _userRepository.DeleteAsync(id);
-            await _userRepository.SaveChangesAsync();
-
+            await _userService.DeleteUserAsync(id);
             return NoContent();
         }
     }

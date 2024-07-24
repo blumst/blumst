@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using StockWebApp1.Interfaces;
-using StockWebApp1.Models;
+using StockWebApp1.DTO;
+using StockWebApp1.Services;
 
 namespace StockWebApp1.Controllers
 {
@@ -8,66 +8,45 @@ namespace StockWebApp1.Controllers
     [ApiController]
     public class RatingController : ControllerBase
     {
-        private readonly IRepository<Rating> _ratingRepository;
+        private readonly RatingService _ratingService;
 
-        public RatingController(IRepository<Rating> ratingRepository)
-        {
-            _ratingRepository = ratingRepository;
-        }
+        public RatingController(RatingService ratingService) => _ratingService = ratingService;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var rating = await _ratingRepository.GetAllAsync();
+            var rating = await _ratingService.GetAllRatingAsync();
             return Ok(rating);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var rating = await _ratingRepository.GetByIdAsync(id);
-
-            if (rating == null)
-                return NotFound(new { Message = "Rating has not been found." });
-
+            var rating = await _ratingService.GetRatingByIdAsync(id);
             return Ok(rating);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Rating rating)
+        public async Task<IActionResult> Create(RatingDto ratingDto)
         {
-            await _ratingRepository.AddAsync(rating);
-            await _ratingRepository.SaveChangesAsync();
+            await _ratingService.CreateRatingAsync(ratingDto);
+            var routeValues = new { id = ratingDto.Id };
 
-            var routeValues = new { id = rating.Id };
-
-            return CreatedAtAction(nameof(GetById), routeValues, rating);
+            return CreatedAtAction(nameof(GetById), routeValues, ratingDto);
 
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, Rating rating)
+        public async Task<IActionResult> Update(Guid id, RatingDto ratingDto)
         {
-            if (id != rating.Id)
-                return BadRequest();
-
-            _ratingRepository.Update(rating);
-            await _ratingRepository.SaveChangesAsync();
-
+            await _ratingService.UpdateRatingAsync(id, ratingDto);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var user = await _ratingRepository.GetByIdAsync(id);
-
-            if (user == null)
-                return NotFound();
-
-            await _ratingRepository.DeleteAsync(id);
-            await _ratingRepository.SaveChangesAsync();
-
+            await _ratingService.DeleteRatingAsync(id);
             return NoContent();
         }
     }

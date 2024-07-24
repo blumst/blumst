@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using StockWebApp1.Interfaces;
-using StockWebApp1.Models;
+using StockWebApp1.DTO;
+using StockWebApp1.Services;
 
 namespace StockWebApp1.Controllers
 {
@@ -8,66 +8,45 @@ namespace StockWebApp1.Controllers
     [ApiController]
     public class TagController : ControllerBase
     {
-        private readonly IRepository<Tag> _tagRepository;
+        private readonly TagService _tagService;
 
-        public TagController(IRepository<Tag> tagRepository)
-        {
-            _tagRepository = tagRepository;
-        }
+        public TagController(TagService tagRepository) => _tagService = tagRepository;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var tag = await _tagRepository.GetAllAsync();
+            var tag = await _tagService.GetAllTagAsync();
             return Ok(tag);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var tag = await _tagRepository.GetByIdAsync(id);
-
-            if (tag == null)
-                return NotFound(new { Message = "Tag has not been found." });
-
+            var tag = await _tagService.GetTagByIdAsync(id);
             return Ok(tag);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Tag tag)
+        public async Task<IActionResult> Create(TagDto tagDto)
         {
-            await _tagRepository.AddAsync(tag);
-            await _tagRepository.SaveChangesAsync();
+            await _tagService.CreateTagAsync(tagDto);
+            var routeValues = new { id = tagDto.Id };
 
-            var routeValues = new { id = tag.Id };
-
-            return CreatedAtAction(nameof(GetById), routeValues, tag);
+            return CreatedAtAction(nameof(GetById), routeValues, tagDto);
 
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, Tag tag)
+        public async Task<IActionResult> Update(Guid id, TagDto tagDto)
         {
-            if (id != tag.Id)
-                return BadRequest();
-
-            _tagRepository.Update(tag);
-            await _tagRepository.SaveChangesAsync();
-
+            await _tagService.UpdateTagAsync(id, tagDto);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var tag = await _tagRepository.GetByIdAsync(id);
-
-            if (tag == null)
-                return NotFound();
-
-            await _tagRepository.DeleteAsync(id);
-            await _tagRepository.SaveChangesAsync();
-
+            await _tagService.DeleteTagAsync(id);
             return NoContent();
         }
     }
