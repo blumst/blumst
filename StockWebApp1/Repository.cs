@@ -13,13 +13,16 @@ namespace StockWebApp1.Interfaces
             _dbSet = _context.Set<T>();
         }
 
-        public async Task<T> GetByIdAsync(Guid id) => await _dbSet.FindAsync(id);
+        public async Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken) 
+            => await _dbSet.FindAsync(new object[] { id }, cancellationToken);
 
-        public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
 
-        public async Task AddAsync(T entity)
+        public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken) 
+            => await _dbSet.ToListAsync(cancellationToken);
+
+        public async Task AddAsync(T entity, CancellationToken cancellationToken)
         {
-            await _dbSet.AddAsync(entity);
+            await _dbSet.AddAsync(entity, cancellationToken);
         }
 
         public void Update(T entity)
@@ -27,15 +30,15 @@ namespace StockWebApp1.Interfaces
              _context.Entry(entity).State = EntityState.Modified;
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
-            var entity = await GetByIdAsync(id);
+            var entity = await GetByIdAsync(id, cancellationToken);
             _dbSet.Remove(entity);
         }
 
-        public async Task SaveChangesAsync()
+        public async Task SaveChangesAsync(CancellationToken cancellationToken)
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

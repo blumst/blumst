@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StockWebApp1.DTO;
 using StockWebApp1.Services;
 
 namespace StockWebApp1.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TagController : ControllerBase
@@ -13,40 +15,38 @@ namespace StockWebApp1.Controllers
         public TagController(TagService tagRepository) => _tagService = tagRepository;
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            var tag = await _tagService.GetAllTagAsync();
+            var tag = await _tagService.GetAllTagAsync(cancellationToken);
             return Ok(tag);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
-            var tag = await _tagService.GetTagByIdAsync(id);
+            var tag = await _tagService.GetTagByIdAsync(id, cancellationToken);
             return Ok(tag);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(TagDto tagDto)
+        public async Task<IActionResult> Create(TagDto tagDto, CancellationToken cancellationToken)
         {
-            await _tagService.CreateTagAsync(tagDto);
-            var routeValues = new { id = tagDto.Id };
-
-            return CreatedAtAction(nameof(GetById), routeValues, tagDto);
+            await _tagService.CreateTagAsync(tagDto, cancellationToken);
+            return Ok(tagDto);
 
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, TagDto tagDto)
+        public async Task<IActionResult> Update(Guid id, TagDto tagDto, CancellationToken cancellationToken)
         {
-            await _tagService.UpdateTagAsync(id, tagDto);
+            await _tagService.UpdateTagAsync(id, tagDto, cancellationToken);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            await _tagService.DeleteTagAsync(id);
+            await _tagService.DeleteTagAsync(id, cancellationToken);
             return NoContent();
         }
     }

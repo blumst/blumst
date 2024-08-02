@@ -1,11 +1,15 @@
 using AutoMapper;
+using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using StockWebApp1.DTO;
 using StockWebApp1.Interfaces;
 using StockWebApp1.Models;
 using StockWebApp1.Validators;
+using System.Text;
 
 namespace StockWebApp1
 {
@@ -15,8 +19,12 @@ namespace StockWebApp1
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers().AddFluentValidation(validator =>
-                    validator.RegisterValidatorsFromAssemblyContaining<RegistrationValidator>()); ;
+            builder.Services.AddControllers();
+            builder.Services.AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
+
+            builder.Services.AddValidatorsFromAssemblyContaining<RegistrationValidator>();
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -26,6 +34,32 @@ namespace StockWebApp1
             builder.Services.AddIdentity<User, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
+
+            builder.Services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                var jwtKey = builder.Configuration["JwtSettings:Key"];
+                var jwtIssuer = builder.Configuration["JwtSettings:Issuer"];
+                var jwtAudience = builder.Configuration["JwtSettings:Audience"];
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = jwtIssuer, 
+                    ValidAudience = jwtAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey
+                        (Encoding.UTF8.GetBytes(jwtKey!)),
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                };
+            });
+
+            builder.Services.AddAuthorization();
 
             builder.Services.Configure<IdentityOptions>(options =>
             {

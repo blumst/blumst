@@ -16,50 +16,50 @@ namespace StockWebApp1
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUserAsync()
+        public async Task<IEnumerable<UserDto>> GetAllUserAsync(CancellationToken cancellationToken)
         {
-            var users = await _userRepository.GetAllAsync();
+            var users = await _userRepository.GetAllAsync(cancellationToken);
             return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
-        public async Task<UserDto> GetUserByIdAsync(Guid id)
+        public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetByIdAsync(id);
+            var user = await _userRepository.GetByIdAsync(id, cancellationToken);
             return user == null ? throw new KeyNotFoundException("User not found") 
                 : _mapper.Map<UserDto>(user);
         }
 
-        public async Task CreateUserAsync(UserDto userDto)
+        public async Task CreateUserAsync(UserDto userDto, CancellationToken cancellationToken)
         {
             var user = _mapper.Map<User>(userDto);
 
             user.DateCreated = DateTime.UtcNow;
 
-            await _userRepository.AddAsync(user);
-            await _userRepository.SaveChangesAsync();
+            await _userRepository.AddAsync(user, cancellationToken);
+            await _userRepository.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateUserAsync(Guid id, UserDto userDto)
+        public async Task UpdateUserAsync(Guid id, UserDto userDto, CancellationToken cancellationToken)
         {
             if (id != userDto.Id)
                 throw new ArgumentException("Id not found.");
 
-            var currentUser = await _userRepository.GetByIdAsync(id) 
+            var currentUser = await _userRepository.GetByIdAsync(id, cancellationToken) 
                 ?? throw new Exception("User not found.");
 
             _mapper.Map(userDto, currentUser);
 
             _userRepository.Update(currentUser);
-            await _userRepository.SaveChangesAsync();
+            await _userRepository.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteUserAsync(Guid id)
+        public async Task DeleteUserAsync(Guid id, CancellationToken cancellationToken)
         {
-            _ = await _userRepository.GetByIdAsync(id)
+            _ = await _userRepository.GetByIdAsync(id, cancellationToken)
                 ?? throw new KeyNotFoundException("User not found");
 
-            await _userRepository.DeleteAsync(id);
-            await _userRepository.SaveChangesAsync();
+            await _userRepository.DeleteAsync(id, cancellationToken);
+            await _userRepository.SaveChangesAsync(cancellationToken);
         }
     }
 }

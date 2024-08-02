@@ -16,47 +16,47 @@ namespace StockWebApp1.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<CommentDto>> GetAllCommentAsync()
+        public async Task<IEnumerable<CommentDto>> GetAllCommentAsync(CancellationToken cancellationToken)
         {
-            var comments =  await _commentRepository.GetAllAsync();
+            var comments =  await _commentRepository.GetAllAsync(cancellationToken);
             return _mapper.Map<IEnumerable<CommentDto>>(comments);
         }
 
-        public async Task<CommentDto> GetCommentByIdAsync(Guid id)
+        public async Task<CommentDto> GetCommentByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var comment = await _commentRepository.GetByIdAsync(id);
+            var comment = await _commentRepository.GetByIdAsync(id, cancellationToken);
             return comment == null ? throw new KeyNotFoundException("Comment not found") : _mapper.Map<CommentDto>(comment);
         }
 
-        public async Task CreateCommentAsync(CommentDto commentDto)
+        public async Task CreateCommentAsync(CommentDto commentDto, CancellationToken cancellationToken)
         {
             var comment = _mapper.Map<Comment>(commentDto);
             comment.DateCreated = DateTime.UtcNow;
-            await _commentRepository.AddAsync(comment);
-            await _commentRepository.SaveChangesAsync();
+            await _commentRepository.AddAsync(comment, cancellationToken);
+            await _commentRepository.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateCommentAsync(Guid id, CommentDto commentDto)
+        public async Task UpdateCommentAsync(Guid id, CommentDto commentDto, CancellationToken cancellationToken)
         {
             if (id != commentDto.Id)
                 throw new ArgumentException("Id not found.");
 
-            var currentComment = await _commentRepository.GetByIdAsync(id)
+            var currentComment = await _commentRepository.GetByIdAsync(id, cancellationToken)
                 ?? throw new Exception("Comment not found.");
 
             _mapper.Map(commentDto, currentComment);
 
             _commentRepository.Update(currentComment);
-            await _commentRepository.SaveChangesAsync();
+            await _commentRepository.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteCommentAsync(Guid id)
+        public async Task DeleteCommentAsync(Guid id, CancellationToken cancellationToken)
         {
-            _ = await _commentRepository.GetByIdAsync(id)
+            _ = await _commentRepository.GetByIdAsync(id, cancellationToken)
                 ?? throw new KeyNotFoundException("Comment not found");
 
-            await _commentRepository.DeleteAsync(id);
-            await _commentRepository.SaveChangesAsync();
+            await _commentRepository.DeleteAsync(id, cancellationToken);
+            await _commentRepository.SaveChangesAsync(cancellationToken);
         }
     }
 }

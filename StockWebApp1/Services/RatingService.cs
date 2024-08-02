@@ -17,47 +17,47 @@ namespace StockWebApp1.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<RatingDto>> GetAllRatingAsync()
+        public async Task<IEnumerable<RatingDto>> GetAllRatingAsync(CancellationToken cancellationToken)
         {
-            var ratings = await _ratingRepository.GetAllAsync();
+            var ratings = await _ratingRepository.GetAllAsync(cancellationToken);
             return _mapper.Map<IEnumerable<RatingDto>>(ratings);
         }
 
-        public async Task<RatingDto> GetRatingByIdAsync(Guid id)
+        public async Task<RatingDto> GetRatingByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var rating = await _ratingRepository.GetByIdAsync(id);
+            var rating = await _ratingRepository.GetByIdAsync(id, cancellationToken);
             return rating == null ? throw new KeyNotFoundException("Rating not found") 
                 : _mapper.Map<RatingDto>(rating);
         }
 
-        public async Task CreateRatingAsync(RatingDto ratingDto)
+        public async Task CreateRatingAsync(RatingDto ratingDto, CancellationToken cancellationToken)
         {
             var rating = _mapper.Map<Rating>(ratingDto);
-            await _ratingRepository.AddAsync(rating);
-            await _ratingRepository.SaveChangesAsync();
+            await _ratingRepository.AddAsync(rating, cancellationToken);
+            await _ratingRepository.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateRatingAsync(Guid id, RatingDto ratingDto)
+        public async Task UpdateRatingAsync(Guid id, RatingDto ratingDto, CancellationToken cancellationToken)
         {
             if (id != ratingDto.Id)
                 throw new ArgumentException("Id not found.");
 
-            var currentRating = await _ratingRepository.GetByIdAsync(id)
+            var currentRating = await _ratingRepository.GetByIdAsync(id, cancellationToken)
                 ?? throw new Exception("Rating not found.");
 
             _mapper.Map(ratingDto, currentRating);
 
             _ratingRepository.Update(currentRating);
-            await _ratingRepository.SaveChangesAsync();
+            await _ratingRepository.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteRatingAsync(Guid id)
+        public async Task DeleteRatingAsync(Guid id, CancellationToken cancellationToken)
         {
-            _ = await _ratingRepository.GetByIdAsync(id)
+            _ = await _ratingRepository.GetByIdAsync(id, cancellationToken)
                 ?? throw new KeyNotFoundException("Rating not found");
 
-            await _ratingRepository.DeleteAsync(id);
-            await _ratingRepository.SaveChangesAsync();
+            await _ratingRepository.DeleteAsync(id, cancellationToken);
+            await _ratingRepository.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StockWebApp1.DTO;
 using StockWebApp1.Services;
 
 namespace StockWebApp1.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ContentController : ControllerBase
@@ -13,40 +15,38 @@ namespace StockWebApp1.Controllers
         public ContentController(ContentService contentService) => _contentService = contentService;
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            var content = await _contentService.GetAllContentAsync();
+            var content = await _contentService.GetAllContentAsync(cancellationToken);
             return Ok(content);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
-            var content = await _contentService.GetContentByIdAsync(id);
+            var content = await _contentService.GetContentByIdAsync(id, cancellationToken);
             return Ok(content);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ContentDto contentDto)
+        public async Task<IActionResult> Create(ContentDto contentDto, CancellationToken cancellationToken)
         {
-            await _contentService.CreateContentAsync(contentDto);
-            var routeValues = new { id = contentDto.Id };
-
-            return CreatedAtAction(nameof(GetById), routeValues, contentDto);
+            await _contentService.CreateContentAsync(contentDto, cancellationToken);
+            return Ok(contentDto);
 
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, ContentDto contentDto)
+        public async Task<IActionResult> Update(Guid id, ContentDto contentDto, CancellationToken cancellationToken)
         {
-            await _contentService.UpdateContentAsync(id, contentDto);
+            await _contentService.UpdateContentAsync(id, contentDto, cancellationToken);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            await _contentService.DeleteContentAsync(id);
+            await _contentService.DeleteContentAsync(id, cancellationToken);
             return NoContent();
         }
     }

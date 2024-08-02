@@ -3,34 +3,29 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using StockWebApp1.DTO;
+using StockWebApp1.Interfaces;
 using StockWebApp1.Models;
 
 namespace StockWebApp1.Controllers
 {
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly IMapper _mapper;
+        private readonly IAccountService _accountService;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper)
+        public AccountController(IAccountService accountService)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _mapper = mapper;
+            _accountService = accountService;
         }
 
         [HttpPost]
         [AllowAnonymous]
         [Route("registration")]
-        public  async Task<IActionResult> Register([FromBody] RegisterDto model)
+        public  async Task<IActionResult> Register([FromBody] RegisterDto registerModel)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = _mapper.Map<User>(model);
-            user.DateCreated = DateTime.UtcNow;
-            var result = await _userManager.CreateAsync(user, model.PasswordHash);
+            var result = await _accountService.RegisterAsync(registerModel);
 
             return !result.Succeeded
                 ? new BadRequestObjectResult("There was an error processing your request, please try again.")
@@ -40,16 +35,16 @@ namespace StockWebApp1.Controllers
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginDto model)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginModel)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _signInManager.PasswordSignInAsync(model.UserName, model.PasswordHash, isPersistent: true, lockoutOnFailure: false);
+            var token = await _accountService.LoginAsync(loginModel);
 
-            return !result.Succeeded
+            return string.IsNullOrEmpty(token)
                 ? new BadRequestObjectResult("Invalid login attempt.")
-                : new OkObjectResult("Login Successful");
+                : new OkObjectResult(new {Token = token});
         }
 
         [HttpPost]
@@ -57,7 +52,7 @@ namespace StockWebApp1.Controllers
         [Authorize]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await _accountService.LogoutAsync();
 
             return Ok("Logout Successful");
         }
@@ -67,7 +62,7 @@ namespace StockWebApp1.Controllers
         [Authorize]
         public async Task<IActionResult> Profile()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _accountService.GetProfileAsync(User);
 
             if (user == null)
                 return NotFound("User not found");

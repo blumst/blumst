@@ -16,46 +16,46 @@ namespace StockWebApp1.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ContentDto>> GetAllContentAsync()
+        public async Task<IEnumerable<ContentDto>> GetAllContentAsync(CancellationToken cancellationToken)
         {
-            var content = await _contentRepository.GetAllAsync();
+            var content = await _contentRepository.GetAllAsync(cancellationToken);
             return _mapper.Map<IEnumerable<ContentDto>>(content);   
         }
 
-        public async Task<ContentDto> GetContentByIdAsync(Guid id)
+        public async Task<ContentDto> GetContentByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var content = await _contentRepository.GetByIdAsync(id);
+            var content = await _contentRepository.GetByIdAsync(id, cancellationToken);
             return content == null ? throw new KeyNotFoundException("Content not found") : _mapper.Map<ContentDto>(content);
         }
 
-        public async Task CreateContentAsync(ContentDto contentDto)
+        public async Task CreateContentAsync(ContentDto contentDto, CancellationToken cancellationToken)
         {
             var content = _mapper.Map<Content>(contentDto);
-            await _contentRepository.AddAsync(content);
-            await _contentRepository.SaveChangesAsync();
+            await _contentRepository.AddAsync(content, cancellationToken);
+            await _contentRepository.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateContentAsync(Guid id, ContentDto contentDto)
+        public async Task UpdateContentAsync(Guid id, ContentDto contentDto, CancellationToken cancellationToken)
         {
             if (id != contentDto.Id)
                 throw new ArgumentException("Id not found.");
 
-            var currentContent = await _contentRepository.GetByIdAsync(id)
+            var currentContent = await _contentRepository.GetByIdAsync(id, cancellationToken)
                 ?? throw new Exception("Content not found.");
 
             _mapper.Map(contentDto, currentContent);
 
             _contentRepository.Update(currentContent);
-            await _contentRepository.SaveChangesAsync();
+            await _contentRepository.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteContentAsync(Guid id)
+        public async Task DeleteContentAsync(Guid id, CancellationToken cancellationToken)
         {
-            _ = await _contentRepository.GetByIdAsync(id)
+            _ = await _contentRepository.GetByIdAsync(id, cancellationToken)
                 ?? throw new KeyNotFoundException("Content not found");
 
-            await _contentRepository.DeleteAsync(id);
-            await _contentRepository.SaveChangesAsync();
+            await _contentRepository.DeleteAsync(id, cancellationToken);
+            await _contentRepository.SaveChangesAsync(cancellationToken);
         }
     }
 }
