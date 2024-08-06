@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockWebApp1.DTO;
+using StockWebApp1.Extensions;
 using StockWebApp1.Interfaces;
-using StockWebApp1.Models;
 
 namespace StockWebApp1.Controllers
 {
@@ -28,7 +26,7 @@ namespace StockWebApp1.Controllers
             var result = await _accountService.RegisterAsync(registerModel);
 
             return !result.Succeeded
-                ? new BadRequestObjectResult("There was an error processing your request, please try again.")
+                ? new BadRequestObjectResult("There was an error processing your request, please try again")
                 : new OkObjectResult("User Register Successfully");
         }
 
@@ -43,7 +41,7 @@ namespace StockWebApp1.Controllers
             var token = await _accountService.LoginAsync(loginModel);
 
             return string.IsNullOrEmpty(token)
-                ? new BadRequestObjectResult("Invalid login attempt.")
+                ? new BadRequestObjectResult("Invalid login attempt")
                 : new OkObjectResult(new {Token = token});
         }
 
@@ -64,8 +62,7 @@ namespace StockWebApp1.Controllers
         {
             var user = await _accountService.GetProfileAsync(User);
 
-            if (user == null)
-                return NotFound("User not found");
+            user.EnsureFound("User not found");
 
             return Ok(user);
         }
