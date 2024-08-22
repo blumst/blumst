@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using StockWebApp1.DTO;
 using StockWebApp1.Extensions;
 using StockWebApp1.Interfaces;
+using StockWebApp1.Models;
 
 namespace StockWebApp1.Controllers
 {
@@ -42,7 +43,7 @@ namespace StockWebApp1.Controllers
 
             return string.IsNullOrEmpty(token)
                 ? new BadRequestObjectResult("Invalid login attempt")
-                : new OkObjectResult(new {Token = token});
+                : new OkObjectResult(new LoginResponse {Token = token});
         }
 
         [HttpPost]

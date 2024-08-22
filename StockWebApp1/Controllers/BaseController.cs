@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using StockWebApp1.Interfaces;
 using StockWebApp1.Services;
 
 namespace StockWebApp1.Controllers
 {
     public class BaseController<TEntity, TService, TDto> : ControllerBase 
-        where TService : BaseService<TEntity, TDto>
+        where TService : IBaseService<TEntity, TDto>
     {
         protected readonly TService _service;
 

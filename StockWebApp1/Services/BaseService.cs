@@ -4,7 +4,7 @@ using StockWebApp1.Interfaces;
 
 namespace StockWebApp1.Services
 {
-    public class BaseService<TEntity, TDto>
+    public class BaseService<TEntity, TDto> : IBaseService<TEntity, TDto>
     {
         protected readonly IRepository<TEntity> _repository;
         protected readonly IMapper _mapper;
