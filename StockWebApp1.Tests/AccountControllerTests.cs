@@ -23,11 +23,14 @@ namespace StockWebApp1.Tests
         [Fact]
         public async Task Register_WhenRegistrationIsSuccessful_ReturnsOk()
         {
+            // Arrange
             var registerDto = new RegisterDto { UserName = "testUser", Password = "testPassword123" };
             _accountServiceMock.Setup(x => x.RegisterAsync(registerDto)).ReturnsAsync(IdentityResult.Success);
             
+            // Act
             var result = await _controller.Register(registerDto);
 
+            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Equal("User Register Successfully", okResult.Value);
         }
