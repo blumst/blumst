@@ -10,7 +10,7 @@ namespace StockWebApp1.Services
         protected readonly IMapper _mapper;
         private readonly string _entityName;
 
-        protected BaseService(IRepository<TEntity> repository, IMapper mapper)
+        public BaseService(IRepository<TEntity> repository, IMapper mapper)
         {
             _repository = repository;
             _mapper = mapper;
