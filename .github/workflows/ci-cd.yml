@@ -1,0 +1,84 @@
+name: CI/CD for StockWebApp1
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Restore
+      run: dotnet restore StockWebApp1/StockWebApp1.sln
+      
+    - name: Build
+      run: dotnet build StockWebApp1/StockWebApp1.sln --configuration Release
+      
+    - name: Run unit tests
+      run: dotnet test StockWebApp1/StockWebApp1.sln --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=unit_tests.trx"
+    
+    - name: Publish unit test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: unit_tests
+        path: 'StockWebApp1.Tests/TestResults/unit_tests.trx'
+    
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+      
+    - name: Build Docker image
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/stockwebapp1:latest -f StockWebApp1/Dockerfile StockWebApp1
+
+    - name: Push Docker image to DockerHub
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/stockwebapp1:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+        
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Azure Container Instance
+      uses: azure/aci-deploy@v1
+      with:
+        location: westeurope
+        resource-group: stock-webapp_group
+        name: stockwebapp1
+        dns-name-label: stockwebapp1-blumst
+        registry-login-server: index.docker.io
+        registry-username: ${{ secrets.IMAGE_REGISTRY_USERNAME }}
+        registry-password: ${{ secrets.IMAGE_REGISTRY_PASSWORD }}
+        image: ${{ secrets.DOCKER_USERNAME }}/stockwebapp1:latest
+        ports: 8080 
