@@ -78,7 +78,7 @@ jobs:
         name: stockwebapp1
         dns-name-label: stockwebapp1-blumst
         registry-login-server: index.docker.io
-        registry-username: ${{ secrets.IMAGE_REGISTRY_USERNAME }}
-        registry-password: ${{ secrets.IMAGE_REGISTRY_PASSWORD }}
+        registry-username: ${{ secrets.DOCKER_USERNAME }}
+        registry-password: ${{ secrets.DOCKER_PASSWORD }}
         image: ${{ secrets.DOCKER_USERNAME }}/stockwebapp1:latest
         ports: 8080 
